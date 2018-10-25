@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+   <head>
+     <title>Find the Alphabets</title>
+
+     <style>
+        body {
+           background: #dddddd;
+           text-align: center;
+        }
+        div{
+            color:#060238;
+            font-size:20px;
+            padding:10px;
+            margin: 0 auto;
+        }
+        #canvas {
+           margin: 0 auto;
+           background: #ffffff;
+           border: thin inset rgba(100,150,230,0.5);
+           cursor: pointer;
+          }
+
+     </style>
+  </head>
+
+  <body onload="startGame()">
+   <div>Find the Alphabets by clicking on the circles and drag them in the right bucket!</div>
+    <canvas id='canvas' tabindex="1" width='700' height='590'>
+      Canvas not supported
+    </canvas>
+
+    <script>
+var canvas = document.getElementById('canvas'),
+    context = canvas.getContext('2d'),
+    MAX_X=700,
+    MAX_Y=400,
+    boxX=100,
+    boxY=420,
+    boxW=200,
+    boxH=100,
+    v=[],
+    c=[],
+    vj=false,
+    cj=false,
+    text,
+    letter=[],
+    letterV=[],
+    letterC=[],
+    let=["A","E","I","O","U","B","C","D","F","G","H","J","K","L","M","N","P","Q","R","S","T","V","W","X","Y","Z"];
+
+function startGame()
+{
+    makeShapes();
+    drawLetterInBox();
+ //   text=new componentText("red");
+    setInterval(updateGame,50);
+
+}
+
+ function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++)
+    {
+    color += letters[Math.floor(Math.random() * 16)];
+    }
+  return color;
+}
+function makeShapes()
+{
+    for(var i=0;i<26;i++)
+    {
+      var col=getRandomColor();
+    letter[i]=new component(col,col,Math.random()*(MAX_X),Math.random()*(MAX_Y),20,let[i]);
+    }
+}
+
+function component(color1,color2, x, y,radius,type) {
+    this.type=type;
+    this.radius = radius;
+    this.speedX = 1;
+    this.speedY = 1;
+    this.x = x;
+    this.y = y;
+    this.color1=color1;
+    this.color2=color2;
+    this.maxY=MAX_Y;
+    this.update = function() {
+        context.fillStyle=this.color1;
+        context.beginPath();
+        context.arc(this.x, this.y,this.radius, 0, Math.PI*2, true);
+        context.fill();
+        context.font="30px Arial";
+        context.fillStyle=this.color2;
+        context.fillText(this.type,this.x-this.radius/2,this.y+this.radius*2/3);
+        }
+
+    this.newPos=function(){
+        this.x+=this.speedX;
+        this.y+=this.speedY;
+        if( this.x <= this.radius ) {
+        this.x=this.radius;
+        this.speedX = -this.speedX;
+        }
+        if( this.x >= MAX_X-this.radius ) {
+        this.x = MAX_X-this.radius;
+        this.speedX = -this.speedX;
+        }
+        if( this.y <= this.radius ) {
+        this.y = this.radius;
+        this.speedY = -this.speedY;
+        }
+        if( this.y >= this.maxY-this.radius) {
+        this.y =this.maxY-this.radius;
+        this.speedY = -this.speedY;
+        }
+
+    }
+}
+function componentInBox(x,y,color,type)
+{
+    this.x=x;
+    this.y=y;
+    this.color=color;
+    this.type=type;
+    this.update=function()
+    {
+    context.font="30px Arial";
+    context.fillStyle=this.color;
+    context.fillText(this.type,this.x,this.y);
+    }
+
+}
+
+function componentText()
+{  for(var i=0;i<5;i++)
+    {
+      if(letter[i].x==letterV[i].x+letter[i].radius/2&&letter[i].y==letterV[i].y-letter[i].radius*2/3)
+        {
+            v[i]=true;
+        }
+
+    }
+    for(var i=0;i<21;i++)
+    {
+        if( letter[i+5].x==letterC[i].x+letter[i+5].radius/2&&letter[i+5].y==letterC[i].y-letter[i+5].radius*2/3)
+        {
+           c[i]=true;
+        }
+
+    }
+    for(var i=0;i<5;i++)
+    {
+      if(v[i]==true)
+      {
+        vj=true;
+      }else{
+		  vj=false;
+		  break;
+	  }
+
+    }
+    for(var i=0;i<21;i++)
+    {
+      if(c[i]==true)
+      {
+        cj=true;
+      }else{
+		  cj=false;
+		  break;
+	  }
+
+    }
+    context.font="60px Arial";
+
+    if(vj==true&&cj==true)
+    {
+        context.fillStyle="green";
+        context.fillText("Good job!", 200,200);
+
+    }
+
+}
+function clear(){
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+}
+function windowToCanvas(canvas, x, y) {
+   var bbox = canvas.getBoundingClientRect();
+return { x: x - bbox.left * (canvas.width  / bbox.width),
+            y: y - bbox.top  * (canvas.height / bbox.height)
+        };
+}
+
+canvas.onclick = function (e) {
+   var loc = windowToCanvas(canvas, e.clientX, e.clientY);
+   for(var i=0;i<26;i++){
+       if (letter[i].x -letter[i].radius< loc.x &&
+            letter[i].x + letter[i].radius > loc.x &&
+            letter[i].y-letter[i].radius < loc.y &&
+            letter[i].y + letter[i].radius > loc.y) {
+
+           letter[i].color1="#ffffff00";
+        }
+   }
+}
+canvas.onmousemove=function(e)
+{
+    var loc = windowToCanvas(canvas, e.clientX, e.clientY);
+
+    for(var i=0;i<26;i++)
+    {
+        if (letter[i].color1=="#ffffff00"&& letter[i].x -letter[i].radius< loc.x &&
+            letter[i].x + letter[i].radius > loc.x &&
+            letter[i].y-letter[i].radius < loc.y &&
+            letter[i].y + letter[i].radius > loc.y)
+            {
+                letter[i].x=loc.x;
+                letter[i].y=loc.y;
+                letter[i].speedX=0;
+                letter[i].speedY=0;
+                letter[i].maxY=590;
+                for(var j=0;j<5;j++)
+                {
+                  if(letter[i].type==letterV[j].type&&letter[i].x>boxX&&letter[i].x<boxX+boxW&&letter[i].y>boxY&&letter[i].y<boxY+boxH)
+                   {
+                    letter[i].x=letterV[j].x+letter[i].radius/2;
+                    letter[i].y=letterV[j].y-letter[i].radius*2/3;
+                    }
+                }
+                for(var j=0;j<21;j++)
+                {
+                    if(letter[i].type==letterC[j].type&&letter[i].x>boxX+boxW+80&&letter[i].x<boxX+2*boxW+80&&letter[i].y>boxY&&letter[i].y<boxY+boxH)
+                    {
+                        letter[i].x=letterC[j].x+letter[i].radius/2;
+                        letter[i].y=letterC[j].y-letter[i].radius*2/3;
+                    }
+                }
+
+            }
+    }
+
+}
+
+
+canvas.onkeydown=function(e)
+{
+    if(e.keyCode=37)
+    {
+        for(var i=0;i<26;i++)
+        {
+            letter[i].radius+=2;
+        }
+    }
+}
+
+canvas.onkeyup=function(e)
+{
+    if(e.keyCode=37)
+    {
+        for(var i=0;i<26;i++)
+        {
+            letter[i].radius-=2;
+        }
+    }
+}
+function drawBackground()
+{
+        context.strokeStyle = "grey";
+        context.strokeRect(0,0,MAX_X,MAX_Y);
+        context.strokeStyle = "grey";
+        context.strokeRect(boxX,boxY,boxW,boxH);
+        context.font="30px Arial";
+        context.fillStyle="grey";
+        context.fillText("Vowel",boxX+50,boxY+130);
+        context.strokeStyle = "grey";
+        context.strokeRect(boxX+boxW+80,boxY,boxW,boxH);
+        context.fillStyle="grey";
+        context.fillText("Consonant",boxX+310,boxY+130);
+}
+function drawLetterInBox()
+{
+    for(var i=0;i<5;i++)
+    {
+     letterV[i]=new componentInBox(boxX+boxW/7*(i+1),boxY+boxH/2+5,"white",let[i]);
+    }
+    for(var i=0;i<21;i++)
+    {
+        letterC[i]=new componentInBox(boxX+boxW+80+boxW/8*(i%7+0.5),boxY+boxH/4*(Math.floor(i/7)+1)+10,"white",let[i+5]);
+    }
+
+}
+
+function updateGame()
+{
+        clear();
+        drawBackground();
+
+
+        for(i=0;i<5;i++)
+        {
+            letterV[i].update();
+        }
+        for(i=0;i<21;i++)
+        {
+            letterC[i].update();
+        }
+        for(i=0;i<26;i++)
+        {
+            letter[i].update();
+            letter[i].newPos();
+        }
+        componentText();
+        canvas.onclick;
+        canvas.onkeydown;
+        canvas.onkeyup;
+        canvas.onmousemove;
+
+}
+
+
+</script>
+</body>
+</html>
